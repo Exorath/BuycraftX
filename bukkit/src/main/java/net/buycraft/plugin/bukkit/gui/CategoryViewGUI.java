@@ -315,7 +315,7 @@ public class CategoryViewGUI {
                         }
                     });
                 } else if (stack.getType() == Material.BOOK_AND_QUILL) {
-                    if (parentId != null) {
+                    if (parentId != null && categoryMenus.containsKey(parentId)) {
                         Bukkit.getScheduler().runTask(plugin, new Runnable() {
                             @Override
                             public void run() {
