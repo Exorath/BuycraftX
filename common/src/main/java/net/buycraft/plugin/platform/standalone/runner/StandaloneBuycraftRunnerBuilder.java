@@ -24,8 +24,11 @@ public class StandaloneBuycraftRunnerBuilder {
     @NonNull
     private boolean verbose = true;
 
+    private Integer checkInterval = null;
+
     public StandaloneBuycraftRunner start() {
-        StandaloneBuycraftRunner runner = new StandaloneBuycraftRunner(dispatcher, determiner, apiKey, logger, executorService, verbose);
+        StandaloneBuycraftRunner runner = checkInterval == null ? new StandaloneBuycraftRunner(dispatcher, determiner, apiKey, logger, executorService, verbose) :
+                new StandaloneBuycraftRunner(dispatcher, determiner, apiKey, logger, executorService, verbose, checkInterval);
         runner.initializeTasks();
         return runner;
     }

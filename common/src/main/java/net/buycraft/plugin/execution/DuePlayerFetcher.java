@@ -15,7 +15,6 @@ import java.util.concurrent.locks.Lock;
 import java.util.concurrent.locks.ReentrantLock;
 import java.util.logging.Level;
 
-@RequiredArgsConstructor
 public class DuePlayerFetcher implements Runnable {
     private static final int MAXIMUM_PER_PAGE = 250;
     private static final int FALLBACK_CHECK_BACK_SECS = 300;
@@ -28,8 +27,27 @@ public class DuePlayerFetcher implements Runnable {
     private final boolean verbose;
     private final Random random = new Random();
 
+    private Integer checkInterval = null;
+
     public boolean inProgress() {
         return inProgress.get();
+    }
+
+    public DuePlayerFetcher(IBuycraftPlatform platform, boolean verbose) {
+        this.platform = platform;
+        this.verbose = verbose;
+    }
+
+    /**
+     * Creates a {@link DuePlayerFetcher} with an overwritten checkInterval. This is the poll interval to retrieve new purchases.
+     *
+     * @param platform
+     * @param verbose       true for debug logging
+     * @param checkInterval interval between the command execution checks (in seconds). Defaults to  {@link DueQueueInformation.QueueInformationMeta#getNextCheck()}
+     */
+    public DuePlayerFetcher(IBuycraftPlatform platform, boolean verbose, int checkInterval) {
+        this(platform, verbose);
+        this.checkInterval = checkInterval;
     }
 
     @Override
@@ -61,7 +79,7 @@ public class DuePlayerFetcher implements Runnable {
             do {
                 try {
                     information = platform.getApiClient().retrieveDueQueue(MAXIMUM_PER_PAGE, page);
-                    nextCheck = information.getMeta().getNextCheck();
+                    nextCheck = checkInterval == null ? information.getMeta().getNextCheck() : checkInterval;
                 } catch (IOException | ApiException e) {
                     platform.log(Level.SEVERE, "Could not fetch due players queue", e);
                     return;
