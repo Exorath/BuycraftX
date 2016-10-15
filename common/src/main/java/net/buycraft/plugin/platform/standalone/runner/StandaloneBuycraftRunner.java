@@ -30,7 +30,7 @@ public class StandaloneBuycraftRunner {
     @Getter
     private DuePlayerFetcher playerFetcher;
 
-    private Integer checkInterval;
+    private Integer checkInterval = null;
 
     StandaloneBuycraftRunner(CommandDispatcher dispatcher, PlayerDeterminer determiner, String apiKey, Logger logger, ScheduledExecutorService executorService, boolean verbose) {
         this.dispatcher = dispatcher;
@@ -52,12 +52,8 @@ public class StandaloneBuycraftRunner {
         } catch (IOException | ApiException e) {
             throw new RuntimeException("Can't fetch account information", e);
         }
-        executorService.schedule(new Runnable() {
-            @Override
-            public void run() {
-                playerFetcher = checkInterval == null ? new DuePlayerFetcher(platform, verbose) : new DuePlayerFetcher(platform, verbose, checkInterval);
-            }
-        }, 1, TimeUnit.SECONDS);
+        executorService.schedule(playerFetcher = checkInterval == null ? new DuePlayerFetcher(platform, verbose) : new DuePlayerFetcher(platform, verbose, checkInterval)
+                , 1, TimeUnit.SECONDS);
     }
 
     @NoBlocking
